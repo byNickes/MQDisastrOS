@@ -45,6 +45,7 @@
 #define DSOS_READ 0x2
 #define DSOS_WRITE 0x3
 #define DSOS_EXCL 0x4
+#define MESSAGE_QUEUE 1
 
 // scheduling
 #define ALPHA 0.5f

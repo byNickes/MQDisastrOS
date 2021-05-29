@@ -9,6 +9,7 @@
 #define RESOURCE_MEMSIZE (sizeof(Resource)+sizeof(int))
 #define RESOURCE_BUFFER_SIZE MAX_NUM_RESOURCES*RESOURCE_MEMSIZE
 
+
 static char _resources_buffer[RESOURCE_BUFFER_SIZE];
 static PoolAllocator _resources_allocator;
 

@@ -11,6 +11,7 @@
 #include "disastrOS_timer.h"
 #include "disastrOS_resource.h"
 #include "disastrOS_descriptor.h"
+#include "disastrOS_message_queue.h"
 
 FILE* log_file=NULL;
 PCB* init_pcb;
@@ -27,15 +28,15 @@ ListHead resources_list;
 SyscallFunctionType syscall_vector[DSOS_MAX_SYSCALLS];
 int syscall_numarg[DSOS_MAX_SYSCALLS];
 
-ucontext_t interrupt_context;           
+ucontext_t interrupt_context;
 ucontext_t trap_context;
 ucontext_t main_context;
 ucontext_t idle_context;
 int shutdown_now=0; // used for termination
 char system_stack[STACK_SIZE];
 
-sigset_t signal_set;                       // process wide signal mask 
-char signal_stack[STACK_SIZE];     
+sigset_t signal_set;                       // process wide signal mask
+char signal_stack[STACK_SIZE];
 volatile int disastrOS_time=0;
 
 
@@ -81,7 +82,7 @@ void setupSignals(void) {
 
 
 int disastrOS_syscall(int syscall_num, ...) {
-  assert(running); 
+  assert(running);
   va_list ap;
   if (syscall_num<0||syscall_num>DSOS_MAX_SYSCALLS)
     return DSOS_ESYSCALL_OUT_OF_RANGE;
@@ -105,7 +106,7 @@ void disastrOS_trap(){
 	    running->pid,
 	    "SYSCALL_IN",
 	    syscall_num);
-  
+
   if (syscall_num<0||syscall_num>DSOS_MAX_SYSCALLS) {
     running->syscall_retvalue = DSOS_ESYSCALL_OUT_OF_RANGE;
     goto return_to_process;
@@ -115,7 +116,7 @@ void disastrOS_trap(){
     running->syscall_retvalue = DSOS_ESYSCALL_NOT_IMPLEMENTED;
     goto return_to_process;
   }
- 
+
   disastrOS_debug("syscall: %d, pid: %d\n", syscall_num, running->pid);
   (*my_syscall)();
   //internal_schedule();
@@ -134,13 +135,14 @@ void disastrOS_trap(){
   }
 }
 
-void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){  
+void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   /* INITIALIZATION OF SYSTEM STRUCTURES*/
   disastrOS_debug("initializing system structures\n");
   PCB_init();
   Timer_init();
   Resource_init();
   Descriptor_init();
+  MessageQueue_init(); //initialization of PoolAllocator for MQ
   init_pcb=0;
 
   // populate the vector of syscalls and number of arguments for each syscall
@@ -149,7 +151,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   }
   syscall_vector[DSOS_CALL_PREEMPT]   = internal_preempt;
   syscall_numarg[DSOS_CALL_PREEMPT]   = 0;
-  
+
   syscall_vector[DSOS_CALL_FORK]      = internal_fork;
   syscall_numarg[DSOS_CALL_FORK]      = 0;
 
@@ -210,13 +212,13 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   makecontext(&interrupt_context, timerInterrupt, 0); //< this is a context for the interrupt
 
 
-  
+
 
   /* STARTING FIRST PROCESS AND IDLING*/
   running=PCB_alloc();
   running->status=Running;
   init_pcb=running;
-  
+
   // create a trampoline for the first process (see spawn)
   disastrOS_debug("preparing trampoline for first process ... ");
   getcontext(&running->cpu_state);
@@ -224,13 +226,13 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   running->cpu_state.uc_stack.ss_size = STACK_SIZE;
   running->cpu_state.uc_stack.ss_flags = 0;
   running->cpu_state.uc_link = &main_context;
-  
+
   makecontext(&running->cpu_state, (void(*)()) f, 1, f_args);
 
 
   // initialize timers and signals
   setupSignals();
-  
+
   // we start the first process
   disastrOS_debug("starting\n");
   if (logfile){

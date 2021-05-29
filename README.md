@@ -1,1 +1,1 @@
-# MQDisastrOS
+# Blocking message queue on disastrOS

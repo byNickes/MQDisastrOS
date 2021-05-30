@@ -4,26 +4,22 @@
 #include "disastrOS_descriptor.h"
 #include "pool_allocator.h"
 #include "linked_list.h"
+#include "disastrOS_message_queue.h"
 
-#define RESOURCE_SIZE sizeof(Resource)
-#define RESOURCE_MEMSIZE (sizeof(Resource)+sizeof(int))
-#define RESOURCE_BUFFER_SIZE MAX_NUM_RESOURCES*RESOURCE_MEMSIZE
-
-
-static char _resources_buffer[RESOURCE_BUFFER_SIZE];
-static PoolAllocator _resources_allocator;
+static Resource* (*resource_alloc_func[MAX_NUM_TYPE_RESOURCES])();
+static int (*resource_free_func[MAX_NUM_TYPE_RESOURCES])(Resource*);
 
 void Resource_init(){
-    int result=PoolAllocator_init(& _resources_allocator,
-				  RESOURCE_SIZE,
-				  MAX_NUM_RESOURCES,
-				  _resources_buffer,
-				  RESOURCE_BUFFER_SIZE);
-    assert(! result);
+  resource_alloc_func[MESSAGE_QUEUE] = MessageQueue_alloc;
+  resource_free_func[MESSAGE_QUEUE] = MessageQueue_free;
 }
 
 Resource* Resource_alloc(int id, int type){
-  Resource* r=(Resource*) PoolAllocator_getBlock(&_resources_allocator);
+  if(type >= MAX_NUM_TYPE_RESOURCES)
+    return 0;
+
+  Resource* r = (*resource_alloc_func[type])();
+
   if (!r)
     return 0;
   r->list.prev=r->list.next=0;
@@ -34,9 +30,12 @@ Resource* Resource_alloc(int id, int type){
 }
 
 int Resource_free(Resource* r) {
+  if(r -> type >= MAX_NUM_TYPE_RESOURCES)
+    return DSOS_ERESOURCENONEXISTANT;
+
   assert(r->descriptors_ptrs.first==0);
   assert(r->descriptors_ptrs.last==0);
-  return PoolAllocator_releaseBlock(&_resources_allocator, r);
+  return (*resource_free_func[r->type])(r);
 }
 
 Resource* ResourceList_byId(ResourceList* l, int id) {

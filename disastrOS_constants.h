@@ -4,6 +4,7 @@
 #define MAX_NUM_RESOURCES 1024
 #define MAX_NUM_RESOURCES_PER_PROCESS 32
 #define MAX_NUM_DESCRIPTORS_PER_PROCESS 32
+#define MAX_NUM_TYPE_RESOURCES 1 //used to alloc resource_alloc_funct and resource_free_func
 
 #define STACK_SIZE        16384
 // signals
@@ -25,6 +26,7 @@
 #define DSOS_ERESOURCENOFD -11
 #define DSOS_ERESOURCECLOSE -12
 #define DSOS_ERESOURCEINUSE -13
+#define DSOS_ERESOURCENONEXISTANT -14
 
 // syscall numbers
 #define DSOS_MAX_SYSCALLS 32
@@ -45,8 +47,10 @@
 #define DSOS_READ 0x2
 #define DSOS_WRITE 0x3
 #define DSOS_EXCL 0x4
-#define MESSAGE_QUEUE 1
 
 // scheduling
 #define ALPHA 0.5f
 #define INTERVAL 100 // milliseconds for timer tick
+
+//resource identifiers
+#define MESSAGE_QUEUE 0

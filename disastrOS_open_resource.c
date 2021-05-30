@@ -19,6 +19,12 @@ void internal_openResource(){
   // otherwise fetch the resource from the system list, and if you don't find it
   // throw an error
   //printf ("CREATING id %d, type: %d, open mode %d\n", id, type, open_mode);
+
+  if(type >= MAX_NUM_TYPE_RESOURCES){
+    running->syscall_retvalue = DSOS_ERESOURCENONEXISTANT;
+    return;
+  }
+
   if (open_mode&DSOS_CREATE){
     if (res) {
       running->syscall_retvalue=DSOS_ERESOURCECREATE;
@@ -33,13 +39,13 @@ void internal_openResource(){
      running->syscall_retvalue=DSOS_ERESOURCEOPEN;
      return;
   }
-  
+
   if (open_mode&DSOS_EXCL && res->descriptors_ptrs.size){
      running->syscall_retvalue=DSOS_ERESOURCENOEXCL;
      return;
   }
 
-  
+
   //5 create the descriptor for the resource in this process, and add it to
   //  the process descriptor list. Assign to the resource a new fd
   Descriptor* des=Descriptor_alloc(running->last_fd, res, running);
@@ -50,7 +56,7 @@ void internal_openResource(){
   running->last_fd++; // we increment the fd value for the next call
   DescriptorPtr* desptr=DescriptorPtr_alloc(des);
   List_insert(&running->descriptors, running->descriptors.last, (ListItem*) des);
-  
+
   //6 add to the resource, in the descriptor ptr list, a pointer to the newly
   //  created descriptor
   des->ptr=desptr;

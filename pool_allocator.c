@@ -27,12 +27,11 @@ PoolAllocatorResult PoolAllocator_init(PoolAllocator* a,
   int requested_size= num_items*(item_size+sizeof(int));
   if (memory_size<requested_size)
     return NotEnoughMemory;
-
   a->item_size=item_size;
   a->size=num_items;
   a->buffer_size=item_size*num_items;
   a->size_max = num_items;
-  
+
   a->buffer=memory_block; // the upper part of the buffer is used as memory
   a->free_list= (int*)(memory_block+item_size*num_items); // the lower part is for bookkeeping
 
@@ -40,7 +39,7 @@ PoolAllocatorResult PoolAllocator_init(PoolAllocator* a,
   for (int i=0; i<a->size-1; ++i){
     a->free_list[i]=i+1;
   }
-  // set the last element to "NULL" 
+  // set the last element to "NULL"
   a->free_list[a->size-1] = NullIdx;
   a->first_idx=0;
   return Success;
@@ -56,9 +55,9 @@ void* PoolAllocator_getBlock(PoolAllocator* a) {
   // advance the head
   a->first_idx=a->free_list[a->first_idx];
   --a->size;
-  
+
   a->free_list[detached_idx]=DetachedIdx;
-  
+
   //now we retrieve the pointer in the item buffer
   char* block_address=a->buffer+(detached_idx*a->item_size);
   return block_address;

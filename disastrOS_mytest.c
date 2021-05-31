@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <poll.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 
 #include "disastrOS.h"
 
@@ -17,12 +19,19 @@ void sleeperFunction(void* args){
 void childFunction(void* args){
   printf("Hello, I am the child function %d\n",disastrOS_getpid());
   printf("I will iterate a bit, before terminating\n");
-  int type=0;
+  int type=MESSAGE_QUEUE;
   int mode=0;
   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
-
   printf("fd=%d\n", fd);
 
+  if(fd >= 0){
+    printf("reading on MQ with fd=%d\n", fd);
+    char message[5];
+    memset(message, 0, 5);
+    int res = disastrOS_readMessageQueue(fd, message, 5);
+    assert(res >= 0);
+    printf("MESSAGE READ IS LONG %d AND IS %s\n", res, message);
+  }
   printf("PID: %d, terminating\n", disastrOS_getpid());
 
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
@@ -43,12 +52,18 @@ void initFunction(void* args) {
   printf("I feel like to spawn 10 nice threads\n");
   int alive_children=0;
   for (int i=0; i<10; ++i) {
-    int type=0;
+    int type=MESSAGE_QUEUE;
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
     printf("opening resource (and creating if necessary)\n");
     int fd=disastrOS_openResource(i,type,mode);
-    printf("fd=%d\n", fd);
+
+    printf("reading on MQ with fd=%d\n", fd);
+    char message[5] = "ciao";
+    int res = disastrOS_writeMessageQueue(fd, message, 5);
+    assert(res >= 0);
+    printf("WRITTEN MESSAGE %s THAT IS LONG %d ON FD %d\n", message, res, fd);
+
     disastrOS_spawn(childFunction, 0);
     alive_children++;
   }

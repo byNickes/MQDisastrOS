@@ -31,7 +31,7 @@ Resource* Resource_alloc(int id, int type){
 
 int Resource_free(Resource* r) {
   if(r -> type >= MAX_NUM_TYPE_RESOURCES)
-    return DSOS_ERESOURCENONEXISTANT;
+    return DSOS_ERESOURCENONEXISTENT;
 
   assert(r->descriptors_ptrs.first==0);
   assert(r->descriptors_ptrs.last==0);

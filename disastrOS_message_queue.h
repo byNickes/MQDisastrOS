@@ -3,19 +3,22 @@
 #include "disastrOS_resource.h"
 #include "pool_allocator.h"
 
+#define MAX_MESSAGE_LENGTH 25
+
 struct MessageQueue_ptr;
 
 typedef struct MessageQueue{
   Resource resource; //MQ extends resource struct
   ListHead messages; //list of messages
-  int written; //written messages
+  int available; //written messages
   //MessageQueue_ptr ptr; is this useless?
 }MessageQueue;
 
 typedef struct Message{
   ListItem list;
   int pid_sender;
-  char* message;
+  int length;
+  char message[MAX_MESSAGE_LENGTH];
 }Message;
 
 //initializes MQ allocator for OS
@@ -27,12 +30,17 @@ Resource* MessageQueue_alloc();
 //function to add into resource_free_func list
 int MessageQueue_free(Resource* r);
 
+//gives first message of mq
+Message* MessageQueue_getFirstMessage(MessageQueue* mq);
+
+void print_MQ(MessageQueue* mq);
+
 //functions for message
 
 void Message_init();
 
 //this one will be used on write syscall for MQ
-Message* Message_alloc(int pid_sender, char* message);
+Message* Message_alloc(int pid_sender, char* message, int m_length);
 
 int Message_free(Message* m);
 

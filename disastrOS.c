@@ -149,6 +149,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   for (int i=0; i<DSOS_MAX_SYSCALLS; ++i){
     syscall_vector[i]=0;
   }
+
   syscall_vector[DSOS_CALL_PREEMPT]   = internal_preempt;
   syscall_numarg[DSOS_CALL_PREEMPT]   = 0;
 
@@ -179,6 +180,12 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   syscall_vector[DSOS_CALL_SHUTDOWN]      = internal_shutdown;
   syscall_numarg[DSOS_CALL_SHUTDOWN]      = 0;
 
+  syscall_vector[DSOS_CALL_READ_MESSAGEQUEUE]      = internal_MessageQueue_read;
+  syscall_numarg[DSOS_CALL_READ_MESSAGEQUEUE]      = 3;
+
+  syscall_vector[DSOS_CALL_WRITE_MESSAGEQUEUE]      = internal_MessageQueue_write;
+  syscall_numarg[DSOS_CALL_WRITE_MESSAGEQUEUE]      = 3;
+
   // setup the scheduling lists
   running=0;
   List_init(&ready_list);
@@ -191,6 +198,7 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   /* INITIALIZATION OF SYSCALL AND INTERRUPT INFRASTRUCTIRE*/
   disastrOS_debug("setting entry point for system shudtown... ");
   getcontext(&main_context); //<< we will come back here on shutdown
+
   if (shutdown_now)
     exit(0);
 
@@ -288,6 +296,13 @@ int disastrOS_destroyResource(int resource_id) {
   return disastrOS_syscall(DSOS_CALL_DESTROY_RESOURCE, resource_id);
 }
 
+int disastrOS_readMessageQueue(int fd, char* buf_des, int buf_length){
+  return disastrOS_syscall(DSOS_CALL_READ_MESSAGEQUEUE, fd, buf_des, buf_length);
+}
+
+int disastrOS_writeMessageQueue(int fd, char* message, int m_length){
+  return disastrOS_syscall(DSOS_CALL_WRITE_MESSAGEQUEUE, fd, message, m_length);
+}
 
 
 void disastrOS_printStatus(){

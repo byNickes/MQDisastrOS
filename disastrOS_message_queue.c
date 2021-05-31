@@ -5,10 +5,10 @@
 #define MQ_MEMSIZE (sizeof(MessageQueue)+sizeof(int))
 #define MQ_BUFFER_SIZE MQ_MEMSIZE*MAX_NUM_RESOURCES
 
-#define MAX_MESSAGES_FOR_RESOURCES 128
+#define MAX_MESSAGES_FOR_MQ 128
 #define M_SIZE sizeof(Message)
 #define M_MEMSIZE (sizeof(Message)+sizeof(int))
-#define MAX_TOTAL_MESSAGES MAX_MESSAGES_FOR_RESOURCES*MAX_NUM_RESOURCES
+#define MAX_TOTAL_MESSAGES MAX_MESSAGES_FOR_MQ*MAX_NUM_RESOURCES
 #define M_BUFFER_SIZE M_MEMSIZE*MAX_TOTAL_MESSAGES
 
 static PoolAllocator mq_allocator;
@@ -30,7 +30,7 @@ Resource* MessageQueue_alloc(){
   if(!mq)
     return NULL;
 
-  mq -> written = 0;
+  mq -> available = 0;
   List_init(&mq -> messages);
   return (Resource*)mq;
 }
@@ -50,6 +50,23 @@ int MessageQueue_free(Resource* r){
   return PoolAllocator_releaseBlock(&mq_allocator, mq);
 }
 
+Message* MessageQueue_getFirstMessage(MessageQueue* mq){
+  return (Message*)mq -> messages.first;
+}
+
+void print_MQ(MessageQueue* mq){
+  if(mq == NULL)
+    return;
+
+  ListItem* m = mq -> messages.first;
+  int i = 0;
+  while(m){
+    printf("MESSAGGIO %d: %s \n", i, (char*)(((Message*)m)->message));
+    i++;
+    m = m -> next;
+  }
+}
+
 //message functions
 
 void Message_init(){
@@ -58,14 +75,20 @@ void Message_init(){
   return;
 }
 
-Message* Message_alloc(int pid_sender, char* message){
+Message* Message_alloc(int pid_sender, char* message, int m_length){
   Message* m=(Message*) PoolAllocator_getBlock(&m_allocator); //getting memory for new Message struct
 
   if(!m)
     return NULL;
+  if(m_length > MAX_MESSAGE_LENGTH)
+    return NULL;
 
   m -> pid_sender = pid_sender;
-  m -> message = message;
+
+  for(int i = 0; i < m_length; i++){
+    m->message[i] = message[i];
+  }
+  m -> length = m_length;
   return m;
 }
 

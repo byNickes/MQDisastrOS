@@ -1,3 +1,5 @@
+#include <stddef.h>
+#include <assert.h>
 #include "disastrOS_message_queue.h"
 #include "disastrOS_syscalls.h"
 #include "disastrOS_descriptor.h"
@@ -13,24 +15,43 @@ void internal_MessageQueue_read(){
     return;
   }
   MessageQueue* mq = (MessageQueue*) mq_des -> resource; //here we have MQ where we have to read on
-  int m_length = MessageQueue_getFirstMessage(mq)->length;
+
+  Message* first_message = MessageQueue_getFirstMessage(mq);
+  if(!first_message){
+    //here we have to wait for the queue to be full
+
+    running->status=Waiting;
+    List_insert(&waiting_list, waiting_list.last, (ListItem*) running);
+    List_insert(&mq->waiting_to_read, mq->waiting_to_read.last, (ListItem*) running); //we take note of who is waiting for something to read into MQ struct
+
+    PCB* next_running= (PCB*) List_detach(&ready_list, ready_list.first);
+    running=next_running;
+    return;
+  }
+
+  int m_length = first_message->length;
   if(m_length>buf_length){
     running -> syscall_retvalue = DSOS_EMQBUFFERTOOSHORT;
     return;
   }
 
   //we are ready to read a message in MQ
-  Message* m = (Message*)List_detach(&mq->messages, mq->messages.first);
+  Message* m = (Message*)List_detach(&mq->messages, (ListItem*)first_message);
+
   for(int i = 0; i<m_length; i++){
     buf_des[i]= m -> message[i];
   }
-  mq -> available -= 1;
 
-  int res = Message_free(m);
-  if(res < 0){
-    running -> syscall_retvalue = res;
-    return;
+  assert(Message_free(m)>=0);
+
+  if(mq->available == MAX_MESSAGES_FOR_MQ && mq->waiting_to_write.size > 0){
+    ListItem* put_in_ready = List_detach(&mq->waiting_to_write, mq->waiting_to_write.first); //we remove one from the waiting list to write of the MQ
+    PCB* pir_pcb = (PCB*) put_in_ready;
+    pir_pcb -> syscall_retvalue = DSOS_EMQAGAIN;
+
+    List_insert(&ready_list, ready_list.last, put_in_ready);
   }
+  mq -> available -= 1;
 
   running->syscall_retvalue=m_length;
   return;

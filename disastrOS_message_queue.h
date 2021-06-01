@@ -1,15 +1,16 @@
-#include <stddef.h>
-#include <assert.h>
 #include "disastrOS_resource.h"
 #include "pool_allocator.h"
 
 #define MAX_MESSAGE_LENGTH 25
+#define MAX_MESSAGES_FOR_MQ 128
 
 struct MessageQueue_ptr;
 
 typedef struct MessageQueue{
   Resource resource; //MQ extends resource struct
   ListHead messages; //list of messages
+  ListHead waiting_to_read;
+  ListHead waiting_to_write;
   int available; //written messages
   //MessageQueue_ptr ptr; is this useless?
 }MessageQueue;

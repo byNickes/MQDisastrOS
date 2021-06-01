@@ -1,11 +1,14 @@
 #include "disastrOS_message_queue.h"
+#include "disastrOS_resource.h"
+#include "pool_allocator.h"
 #include <stdio.h>
+#include <stddef.h>
+#include <assert.h>
 
 #define MQ_SIZE sizeof(MessageQueue)
 #define MQ_MEMSIZE (sizeof(MessageQueue)+sizeof(int))
 #define MQ_BUFFER_SIZE MQ_MEMSIZE*MAX_NUM_RESOURCES
 
-#define MAX_MESSAGES_FOR_MQ 128
 #define M_SIZE sizeof(Message)
 #define M_MEMSIZE (sizeof(Message)+sizeof(int))
 #define MAX_TOTAL_MESSAGES MAX_MESSAGES_FOR_MQ*MAX_NUM_RESOURCES
@@ -51,7 +54,8 @@ int MessageQueue_free(Resource* r){
 }
 
 Message* MessageQueue_getFirstMessage(MessageQueue* mq){
-  return (Message*)mq -> messages.first;
+  if(mq == NULL) return NULL;
+  else return (Message*)mq -> messages.first;
 }
 
 void print_MQ(MessageQueue* mq){

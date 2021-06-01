@@ -5,6 +5,7 @@
 #define MAX_NUM_RESOURCES_PER_PROCESS 32
 #define MAX_NUM_DESCRIPTORS_PER_PROCESS 32
 #define MAX_NUM_TYPE_RESOURCES 1 //used to alloc resource_alloc_funct and resource_free_func
+#define MAX_MESSAGES_FOR_MQ 128 //max messages that can be stored in 1 MQ
 
 #define STACK_SIZE        16384
 // signals
@@ -29,6 +30,7 @@
 #define DSOS_ERESOURCENONEXISTENT -14
 #define DSOS_EMQMESSAGETOOLONG -15
 #define DSOS_EMQBUFFERTOOSHORT -16
+#define DSOS_EMQAGAIN -17
 
 // syscall numbers
 #define DSOS_MAX_SYSCALLS 32

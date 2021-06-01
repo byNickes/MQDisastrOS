@@ -1,5 +1,4 @@
 #include "disastrOS_message_queue.h"
-#include "disastrOS_resource.h"
 #include "pool_allocator.h"
 #include <stdio.h>
 #include <stddef.h>

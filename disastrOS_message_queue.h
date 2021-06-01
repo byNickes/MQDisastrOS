@@ -2,7 +2,6 @@
 #include "pool_allocator.h"
 
 #define MAX_MESSAGE_LENGTH 25
-#define MAX_MESSAGES_FOR_MQ 128
 
 struct MessageQueue_ptr;
 

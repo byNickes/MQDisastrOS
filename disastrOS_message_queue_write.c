@@ -29,6 +29,7 @@ void internal_MessageQueue_write(){
     List_insert(&mq->waiting_to_write, mq->waiting_to_write.last, (ListItem*) running); //we take note of who is waiting for something to read into MQ struct
 
     PCB* next_running= (PCB*) List_detach(&ready_list, ready_list.first);
+    next_running -> status = Running;
     running=next_running;
     return;
   }
@@ -40,15 +41,17 @@ void internal_MessageQueue_write(){
 
   if(mq -> available == 0 && mq->waiting_to_read.size > 0){
     ListItem* put_in_ready = List_detach(&mq->waiting_to_read, mq->waiting_to_read.first); //we remove one from the waiting list to write of the MQ
+    List_detach(&waiting_list, put_in_ready);
+
     PCB* pir_pcb = (PCB*) put_in_ready;
+    pir_pcb -> status = Ready;
     pir_pcb -> syscall_retvalue = DSOS_EMQAGAIN;
 
     List_insert(&ready_list, ready_list.last, put_in_ready);
   }
 
   mq -> available += 1;
-
-
   running -> syscall_retvalue = m_length;
+
   return;
 }

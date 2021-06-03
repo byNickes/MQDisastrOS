@@ -13,7 +13,7 @@ typedef struct MessageQueue{
   int available; //written messages
 }MessageQueue;
 ```
-In questo modo è stato possibile utilizzare le syscall già presenti per l'allocazione delle risorse con l'unica aggiunta del seguente array:
+In questo modo è stato possibile utilizzare le system call, già presenti per l'allocazione delle risorse, con l'unica aggiunta del seguente array:
 ```C
 static Resource* (*resource_alloc_func[MAX_NUM_TYPE_RESOURCES])();
 ```
@@ -24,9 +24,9 @@ Stesso ragionamento è stato fatto con la funzione per liberare memoria occupata
 static int (*resource_free_func[MAX_NUM_TYPE_RESOURCES])(Resource*);
 ```
 che verrà utilizzato nella system call di deallocazione del tipo Resource.
-In una Message Queue teniamo anche traccia dei processi che sono stati messi in attesa per leggere, perchè hanno trovato una coda vuota, e per scrivere, perchè hanno trovato una coda piena. Questi vengono messi in waiting nella system call di read e write della Message Queue mentre vengono risvegliati da chi scrive il primo messaggio o da chi legge l'ultimo, in base alla coda in cui si trovano.
+In una Message Queue teniamo anche traccia dei processi che sono stati messi in attesa per leggere, perchè hanno trovato una coda vuota, e per scrivere, perchè hanno trovato una coda piena. Questi vengono messi in waiting nella system call di read e write della Message Queue, invece, vengono risvegliati da chi scrive il primo messaggio o da chi legge l'ultimo, in base alla coda in cui si trovano.
 
-La struct dei messaggi è, invece, la seguente:
+La struct dei messaggi è la seguente:
 ```C
 typedef struct Message{
   ListItem list;
@@ -65,7 +65,7 @@ E' stato predisposto un programma di test dove vengono instanziate un numero di 
 Il programma di test deve essere compilato con `make` ed avviato con `./disastrOS_test`.
 
 Le code vengono allocate dal padre che poi spawnerà i figli a coppie (uno lettore ed uno scrittore) passandogli come argomento l'ID della risorsa legata a quella Message Queue. I processi con PID dispari saranno lettori ed i processi con PID pari saranno scrittori i quali scriveranno 128 messaggi (numero massimo di messaggi per ogni Message Queue) sulla coda.
-I figli apriranno, una volta passati in esecuzione, la Message Queue. Ogni MQ cicli di spawn dei figli si ricomincia da capo ad assegnare la Message Queue ai processi, si potranno quindi avere più di 2 processi che leggono e/o scrivono su una stessa Message Queue.
+I figli apriranno, una volta passati in esecuzione, la Message Queue. Ogni MQ cicli di spawn dei figli si riparte dalla Message Queue di ID 0 ad assegnare la Message Queue ai processi, si potranno quindi avere più di 2 processi che leggono e/o scrivono su una stessa Message Queue.
 
 Ciò che ci si aspetta è che il numero di messaggi scritti e numero di messaggi letti coincidano.
 

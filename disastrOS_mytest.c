@@ -44,7 +44,7 @@ void childFunction_writer(void* args){
     printf("child: written message is %s\n\n", message);
   }
 
-  printf("child: written 128 messages, I'm exiting..\n");
+  printf("child: written %d messages, I'm exiting..\n", written_messages);
   disastrOS_closeResource(fd);
   disastrOS_exit(written_messages);
 }
@@ -78,7 +78,7 @@ void childFunction_reader(void* args){
     read_messages++;
     printf("child: read message is %s\n\n", message);
   }
-  printf("child: read 128 messages, I'm exiting..\n");
+  printf("child: read %d messages, I'm exiting..\n", read_messages);
   disastrOS_closeResource(fd);
   disastrOS_exit(read_messages);
 }

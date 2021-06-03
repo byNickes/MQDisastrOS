@@ -1,7 +1,7 @@
 #include "disastrOS_resource.h"
 #include "pool_allocator.h"
 
-#define MAX_MESSAGE_LENGTH 25
+#define MAX_MESSAGE_LENGTH 64
 
 struct MessageQueue_ptr;
 
@@ -11,7 +11,6 @@ typedef struct MessageQueue{
   ListHead waiting_to_read;
   ListHead waiting_to_write;
   int available; //written messages
-  //MessageQueue_ptr ptr; is this useless?
 }MessageQueue;
 
 typedef struct Message{
@@ -43,10 +42,3 @@ void Message_init();
 Message* Message_alloc(int pid_sender, char* message, int m_length);
 
 int Message_free(Message* m);
-
-/* is this useless?
-typedef struct MessageQueue_ptr{
-  ListItem list;
-  MessageQueue* mq_ptr;
-}MessageQueue_ptr;
-*/

@@ -13,7 +13,7 @@ typedef struct MessageQueue{
   int available; //written messages
 }MessageQueue;
 ```
-In questo modo è stato possibile utilizzare le syscall già presenti per l'allocazione e deallocazione delle risorse con l'unica aggiunta del seguente array:
+In questo modo è stato possibile utilizzare le syscall già presenti per l'allocazione delle risorse con l'unica aggiunta del seguente array:
 ```C
 static Resource* (*resource_alloc_func[MAX_NUM_TYPE_RESOURCES])();
 ```
@@ -24,7 +24,7 @@ Stesso ragionamento è stato fatto con la funzione per liberare memoria occupata
 static int (*resource_free_func[MAX_NUM_TYPE_RESOURCES])(Resource*);
 ```
 che verrà utilizzato nella system call di deallocazione del tipo Resource.
-In una Message Queue teniamo anche traccia dei processi che sono stati messi in attesa per leggere, perchè hanno trovato una coda vuota, e per scrivere, perchè hanno trovato una coda piena. Questi vengono messi in waiting nella system call di read e write della Message Queue mentre vengono risvegliati da chi scrive il primo messaggio o da chi legge l'ultimo, a seconda di in quale coda si trovino.
+In una Message Queue teniamo anche traccia dei processi che sono stati messi in attesa per leggere, perchè hanno trovato una coda vuota, e per scrivere, perchè hanno trovato una coda piena. Questi vengono messi in waiting nella system call di read e write della Message Queue mentre vengono risvegliati da chi scrive il primo messaggio o da chi legge l'ultimo, in base alla coda in cui si trovano.
 
 La struct dei messaggi è, invece, la seguente:
 ```C
@@ -47,7 +47,7 @@ Message* MessageQueue_getFirstMessage(MessageQueue* mq); //Fornisce il primo mes
 
 void print_MQ(MessageQueue* mq); //Stampa la Message Queue mq
 ```
-Infine, sono state installate le system call per richiedere la lettura con i relativi wrapper:
+Infine, sono state installate le system call per richiedere la lettura e scrittura con i relativi wrapper:
 ```C
 void internal_MessageQueue_read();
 int disastrOS_readMessageQueue(int fd, char* buf_des, int buf_length); //Wrapper della read

@@ -32,7 +32,7 @@ int MessageQueue_free(Resource* r);
 //gives first message of mq
 Message* MessageQueue_getFirstMessage(MessageQueue* mq);
 
-void print_MQ(MessageQueue* mq);
+void MessageQueue_print(MessageQueue* mq);
 
 //functions for message
 

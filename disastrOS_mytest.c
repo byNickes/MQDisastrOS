@@ -27,9 +27,12 @@ void childFunction_writer(void* args){
   int fd=disastrOS_openResource(fd_passed,type,mode);
   disastrOS_printStatus();
 
-  printf("fd=%d\n", fd);
+  char message[MAX_MESSAGE_LENGTH] = "Hi I'm a writer.";
 
-  char message[MAX_MESSAGE_LENGTH] = "Ciao, sono uno scrittore.";
+  if(disastrOS_getpid()%5 == 0)
+    disastrOS_sleep(15);
+  if(disastrOS_getpid()%3 == 0)
+    disastrOS_sleep(24);
 
   int res = DSOS_EMQAGAIN;
   int written_messages = 0;
@@ -41,7 +44,6 @@ void childFunction_writer(void* args){
 
     assert(res >= 0);
     written_messages++;
-    printf("child: written message is %s\n\n", message);
   }
 
   printf("child: written %d messages, I'm exiting..\n", written_messages);
@@ -52,20 +54,24 @@ void childFunction_writer(void* args){
 void childFunction_reader(void* args){
   printf("Hello, I am the child function %d\n",disastrOS_getpid());
   printf("I will iterate a bit, before terminating\n");
+
   int type=MESSAGE_QUEUE;
   int mode=0;
   int fd_passed = *(int*)args;
   int fd=disastrOS_openResource(fd_passed,type,mode);
 
-  printf("fd_passed vale %d\n", fd_passed);
+  printf("Reading on MQ with FD = %d\n", fd_passed);
   disastrOS_printStatus();
-
-  printf("fd=%d\n", fd);
 
   char message[MAX_MESSAGE_LENGTH];
 
   int read_messages = 0;
   int res = DSOS_EMQAGAIN;
+
+  if(disastrOS_getpid()%7 == 0)
+    disastrOS_sleep(15);
+  if(disastrOS_getpid()%6 == 0)
+    disastrOS_sleep(24);
 
   for (int i=0; i<MAX_MESSAGES_FOR_MQ; ++i){
     memset(message, 0, sizeof(message));
@@ -73,12 +79,10 @@ void childFunction_reader(void* args){
     while(res == DSOS_EMQAGAIN){
       res = disastrOS_readMessageQueue(fd, message, MAX_MESSAGE_LENGTH);
     }
-
     assert(res >= 0);
     read_messages++;
-    printf("child: read message is %s\n\n", message);
   }
-  printf("child: read %d messages, I'm exiting..\n", read_messages);
+  printf("child %d: read %d messages, I'm exiting..\n", disastrOS_getpid(), read_messages);
   disastrOS_closeResource(fd);
   disastrOS_exit(read_messages);
 }
@@ -88,21 +92,24 @@ void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
 
-  disastrOS_spawn(sleeperFunction, 0);
-
-
   printf("I feel like to spawn %d nice threads\n", CHILDREN);
   int alive_children=0;
   int id_resource[MQ];
-  int fd[MQ];
+
+  int type=0;
+  int mode=DSOS_CREATE;
+  printf("mode: %d\n", mode);
+  printf("opening resource (and creating if necessary)\n");
+
+  disastrOS_spawn(sleeperFunction, 0);
   for (int i=0; i<MQ; ++i) {
-    int type=0;
-    int mode=DSOS_CREATE;
+    type=0;
+    mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
     printf("opening resource (and creating if necessary)\n");
     id_resource[i]= i;
-    fd[i] = disastrOS_openResource(i,type,mode);
-    printf("fd=%d\n", fd[i]);
+
+    assert(disastrOS_openResource(i,type,mode)>=0);
   }
 
   int counter = 0;

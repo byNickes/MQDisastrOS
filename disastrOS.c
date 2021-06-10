@@ -52,6 +52,7 @@ void timerInterrupt(){
   internal_schedule();
   if (log_file)
     fprintf(log_file, "TIME: %d\tPID: %d\tACTION: %s\n", disastrOS_time, running->pid, "TIMER_IN");
+
   setcontext(&running->cpu_state);
 }
 
@@ -116,7 +117,6 @@ void disastrOS_trap(){
     running->syscall_retvalue = DSOS_ESYSCALL_NOT_IMPLEMENTED;
     goto return_to_process;
   }
-
   disastrOS_debug("syscall: %d, pid: %d\n", syscall_num, running->pid);
   (*my_syscall)();
   //internal_schedule();
@@ -322,4 +322,10 @@ void disastrOS_printStatus(){
   printf("\nZombie: ");
   PCBList_print(&zombie_list);
   printf("\n***********************************************\n\n");
+
+  MessageQueue* mq = (MessageQueue*)resources_list.first;
+  while(mq){
+    MessageQueue_print(mq);
+    mq = (MessageQueue*)((ListItem*) mq)->next;
+  }
 };

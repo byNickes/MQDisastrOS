@@ -34,6 +34,8 @@ Resource* MessageQueue_alloc(){
 
   mq -> available = 0;
   List_init(&mq -> messages);
+  List_init(&mq -> waiting_to_read);
+  List_init(&mq -> waiting_to_write);
   return (Resource*)mq;
 }
 
@@ -57,16 +59,33 @@ Message* MessageQueue_getFirstMessage(MessageQueue* mq){
   else return (Message*)mq -> messages.first;
 }
 
-void print_MQ(MessageQueue* mq){
+void MessageQueue_print(MessageQueue* mq){
   if(mq == NULL)
     return;
-
+  printf("Message queue with ID = %d\n",((Resource*)mq)->id);
   ListItem* m = mq -> messages.first;
   int i = 0;
+  if(m == NULL){
+    printf("Empty message queue.\n");
+  }
   while(m){
     printf("MESSAGGIO %d: %s \n", i, (char*)(((Message*)m)->message));
     i++;
     m = m -> next;
+  }
+
+
+  ListItem* waiting_to_read = mq -> waiting_to_read.first;
+  ListItem* waiting_to_write = mq -> waiting_to_write.first;
+
+  while(waiting_to_read){
+    printf("READER IN ATTESA HA PID: %d\n", ((PCBPtr*)waiting_to_read)->pcb->pid);
+    waiting_to_read = waiting_to_read->next;
+  }
+
+  while(waiting_to_write){
+    printf("WRITER IN ATTESA HA PID: %d\n", ((PCBPtr*)waiting_to_write)->pcb->pid);
+        waiting_to_write = waiting_to_write->next;
   }
 }
 

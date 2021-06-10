@@ -7,7 +7,8 @@
 #define MAX_NUM_TYPE_RESOURCES 1 //used to alloc resource_alloc_funct and resource_free_func
 #define MAX_MESSAGES_FOR_MQ 128 //max messages that can be stored in 1 MQ
 
-#define STACK_SIZE        16384
+//#define STACK_SIZE        16384
+#define STACK_SIZE        80000
 // signals
 #define MAX_SIGNALS 32
 #define DSOS_SIGCHLD 0x1

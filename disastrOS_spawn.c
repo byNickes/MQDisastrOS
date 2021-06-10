@@ -14,13 +14,13 @@ void internal_spawn(){
   if (!new_pcb) {
     running->syscall_retvalue=DSOS_ESPAWN;
     return;
-  } 
+  }
 
   new_pcb->status=Ready;
 
   // sets the parent of the newly created process to the running process
   new_pcb->parent=running;
-  
+
   // adds a pointer to the new process to the children list of running
   PCBPtr* new_pcb_ptr=PCBPtr_alloc(new_pcb);
   assert(new_pcb_ptr);

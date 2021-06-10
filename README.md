@@ -13,7 +13,7 @@ typedef struct MessageQueue{
   int available; //written messages
 }MessageQueue;
 ```
-In questo modo è stato possibile utilizzare le system call, già presenti per l'allocazione delle risorse, con l'unica aggiunta del seguente array:
+In questo modo è stato possibile utilizzare la system call, già presente per l'allocazione delle risorse, con l'unica aggiunta del seguente array:
 ```C
 static Resource* (*resource_alloc_func[MAX_NUM_TYPE_RESOURCES])();
 ```
@@ -45,7 +45,7 @@ int MessageQueue_free(Resource* r); //Dealloca la Message Queue r, viene chiamat
 
 Message* MessageQueue_getFirstMessage(MessageQueue* mq); //Fornisce il primo messaggio della Message Queue mq
 
-void print_MQ(MessageQueue* mq); //Stampa la Message Queue mq
+void MessageQueue_print(MessageQueue* mq); //Stampa la Message Queue mq
 ```
 Infine, sono state installate le system call per richiedere la lettura e scrittura con i relativi wrapper:
 ```C

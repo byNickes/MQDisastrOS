@@ -25,6 +25,8 @@ void childFunction_writer(void* args){
   int mode=0;
   int fd_passed = *(int*)args;
   int fd=disastrOS_openResource(fd_passed,type,mode);
+  assert(fd>=0);
+
   disastrOS_printStatus();
 
   char message[MAX_MESSAGE_LENGTH] = "Hi I'm a writer.";
@@ -97,13 +99,13 @@ void initFunction(void* args) {
   int id_resource[MQ];
 
   int type=0;
-  int mode=DSOS_CREATE;
+  int mode=MESSAGE_QUEUE;
   printf("mode: %d\n", mode);
   printf("opening resource (and creating if necessary)\n");
 
   disastrOS_spawn(sleeperFunction, 0);
   for (int i=0; i<MQ; ++i) {
-    type=0;
+    type=MESSAGE_QUEUE;
     mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
     printf("opening resource (and creating if necessary)\n");

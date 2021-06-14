@@ -60,4 +60,5 @@
 #define INTERVAL 100 // milliseconds for timer tick
 
 //resource identifiers
+#define MAX_TYPE_AVAILABLE 0
 #define MESSAGE_QUEUE 0

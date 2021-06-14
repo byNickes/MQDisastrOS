@@ -15,8 +15,8 @@ void Resource_init(){
 }
 
 Resource* Resource_alloc(int id, int type){
-  if(type >= MAX_NUM_TYPE_RESOURCES)
-    return 0;
+  if(type >= MAX_NUM_TYPE_RESOURCES || type>MAX_TYPE_AVAILABLE)
+    return NULL;
 
   Resource* r = (*resource_alloc_func[type])();
 
@@ -30,7 +30,7 @@ Resource* Resource_alloc(int id, int type){
 }
 
 int Resource_free(Resource* r) {
-  if(r -> type >= MAX_NUM_TYPE_RESOURCES)
+  if(r -> type >= MAX_NUM_TYPE_RESOURCES || r->type>MAX_TYPE_AVAILABLE)
     return DSOS_ERESOURCENONEXISTENT;
 
   assert(r->descriptors_ptrs.first==0);

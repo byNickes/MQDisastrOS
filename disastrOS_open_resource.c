@@ -20,7 +20,7 @@ void internal_openResource(){
   // throw an error
   //printf ("CREATING id %d, type: %d, open mode %d\n", id, type, open_mode);
 
-  if(type >= MAX_NUM_TYPE_RESOURCES){
+  if(type >= MAX_NUM_TYPE_RESOURCES || type > MAX_TYPE_AVAILABLE){
     running->syscall_retvalue = DSOS_ERESOURCENONEXISTENT;
     return;
   }
